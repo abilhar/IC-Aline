@@ -1,0 +1,3 @@
+#Second part of research - tagger-like normalizer algorithm
+#Using NLTK's Unigram and Bigram tagger as normalizers
+#Instead of tags, the tuples contain the original word and the normalization -- if there's one.
