@@ -103,12 +103,37 @@ default = nltk.DefaultTagger('')
 uni_tagger = nltk.UnigramTagger(train_data, backoff=default)
 bi_tagger = nltk.BigramTagger(train_data, backoff=default)
 #brill_tagger = nltk.BrillTagger(train_data)
-
-#teste
+       
+#teste de performance
 print("Performance")
 print("Unigram =", uni_tagger.accuracy(test_data)* 100)
 print("Bigram =", bi_tagger.accuracy(test_data)* 100)
 
+#normalização dos textos completos
+def normalizar(texto):
+    resultado = []
 
+    for sent in texto:
+        tokens = re.findall(TOKEN_REGEX, sent)
+
+        normalizados = []
+
+        for token, normalizacao in uni_tagger.tag(tokens):
+            if normalizacao:
+                normalizados.append(normalizacao)
+            else:
+                normalizados.append(token)
+
+        resultado.append(''.join(normalizados))
+
+    return resultado
+
+transcricao_normalizada = normalizar(transcricao_da)
+tweets_normalizados = normalizar(raw_tweets)
+
+print(transcricao_normalizada [:50])
+print(tweets_normalizados [:50])
+
+        
 
 
