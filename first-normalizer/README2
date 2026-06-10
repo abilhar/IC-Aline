@@ -1,1 +1,11 @@
-#First normalizer based on replacing words OOV with their normalized version.
+Algoritmo desenvolvido baseado em substituição simples de palavras OOV por sua normalização a partir de um dicionário de substituições criado manualmente.  
+Bibliotecas utilizadas: re, csv e nltk.  
+Arquivos necessários para rodar o programa disponíveis na pasta "first-normalizer":
+- algoritmo_norm.py (algoritmo)
+- dados_controle.csv (tweets anotados)
+- dadosteste100.csv (tweets originais)
+- dadosteste2000.csv (tweets originais)
+- trans_da_anotada.txt (transcrição anotada)
+- transc_da.txt (transcrição original)
+- lexporbr.csv (léxico do português brasileiro com 215132 itens
+- substituicoes.csv (dicionário de substituições contendo as palavras OOV dos corpora e suas normalizações esperadas, feito manualmente)
