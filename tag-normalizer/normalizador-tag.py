@@ -11,10 +11,11 @@ Etapas:
 1. Carregamento dos corpora originais e anotados.
 2. Conversão das anotações em tuplas,
    formato de leitura dos taggers (original, normalização).
-3. Divisão treino/teste.
-4. Treinamento dos taggers.
-5. Avaliação dos modelos.
-6. Aplicação dos modelos aos textos originais.
+3. Pré normalização dos dados
+4. Divisão treino/teste.
+5. Treinamento dos taggers.
+6. Avaliação dos modelos.
+7. Aplicação dos modelos aos textos originais.
 """
 
 # ==================================================
@@ -75,7 +76,12 @@ TOKEN_REGEX = (
 )
 
 # ==================================================
-# 3. PREPARAÇÃO DOS DADOS DE TREINAMENTO
+# 3. PRÉ-PROCESSAMENTO
+# ==================================================
+
+
+# ==================================================
+# 4. PREPARAÇÃO DOS DADOS DE TREINAMENTO
 # ==================================================
 
 '''
@@ -122,55 +128,186 @@ tokens_tweet = sum(len(sent) for sent in tuplas_tweet)
 print("transcrição:", tokens_transc)
 print("tweets:", tokens_tweet)
 
-# Separação dos dados anotados em conjuntos de treinamento (80%)
-# e avaliação (20%) para medir o desempenho dos taggers.
-TRAIN_RATIO = 0.8
-split_transc = int(len(tuplas_transc) * TRAIN_RATIO)
-split_tweet = int(len(tuplas_tweet) * TRAIN_RATIO)
+# Função para divisão dos dados em train_data e test_data 
+# Contendo itens dos dois corpora
+# Serão usadas partições diferentes para avaliar os resultados obtidos
 
-train_data = (
-    tuplas_transc[:split_transc]
-    + tuplas_tweet[:split_tweet]
-)
-train_data = [x for x in train_data if x] #remoção de listas vazias
+def dividir_dados(tuplas_transc, tuplas_tweet, train_ratio):
+    split_transc = int(len(tuplas_transc) * train_ratio)
+    split_tweet = int(len(tuplas_tweet) * train_ratio)
 
-test_data = (
-    tuplas_transc[split_transc:]
-    + tuplas_tweet[split_tweet:]
-)
-test_data = [x for x in test_data if x] #remoção de listas vazias
+    train_data = (
+        tuplas_transc[:split_transc] +
+        tuplas_tweet[:split_tweet]
+    )
+
+    test_data = (
+        tuplas_transc[split_transc:] +
+        tuplas_tweet[split_tweet:]
+    )
+
+    # Remove listas vazias
+    train_data = [x for x in train_data if x]
+    test_data = [x for x in test_data if x]
+
+    #return train_data, test_data
+    return {"train": train_data,
+            "test": test_data
+           }
+
+# Partições utilizadas: 70/30, 80/20 e 90/10
+# Para treino/teste
+splits = [0.7, 0.8, 0.9]
+data = []
+for s in splits:
+    data.append(dividir_dados(tuplas_transc, tuplas_tweet, s))
+
+'''
+train_data1, test_data1 = dividir_dados(tuplas_transc, tuplas_tweet, 0.7)
+train_data2, test_data2 = dividir_dados(tuplas_transc, tuplas_tweet, 0.8)
+train_data3, test_data3 = dividir_dados(tuplas_transc, tuplas_tweet, 0.9)
+'''
 
 # Os corpora de transcrição e tweets são combinados
 # para formar um único conjunto de treinamento.
 
 # ==================================================
-# 4. TREINAMENTO DOS TAGGERS
+# 5. TREINAMENTO DOS TAGGERS
 # ==================================================
 
-# O tagger padrão retorna uma string vazia para qualquer token sem anotação.
+# Criação de padrões para uso do tagger com regex
+# O padrão final abrange todas os tokens restantes
+# e atribui uma tag vazia para eles como backoff
 # Assim, palavras não vistas durante o treinamento
 # permanecem inalteradas na etapa de normalização.
 
-default = nltk.DefaultTagger('')
-uni_tagger = nltk.UnigramTagger(train_data, backoff=default)
-bi_tagger = nltk.BigramTagger(train_data, backoff=default)
+patterns = [
+     (r"([A-Za-zÀ-ÖØ-öø-ÿ])\1+", r"\1"),   # letras repetidas
+     (r"([!?.,])\1+", r"\1"),              # pontuação repetida
+     (r'SP$', 'São Paulo'),                # SP = são paulo quando maiúsculo
+     (r"(.*)di$", "\1de"),                 # ondi - onde
+     (r"(.*)ti$", "\1te"),                 # chocolati - chocolate
+     (r"(.*)su$", "\1so"),                 # possu - posso
+     (r"(.*)ô$", "\1ou"),                  # verbos terminados em ar
+     (r"(.*)du$", "\1do"),                 # passandu - passando
+     (r".*", "")                           # vazio (default)
+]
+
+# Função para treinar taggers com as partições diferentes de train_data e test_data
+
+def treinar_taggers(train_data, patterns):
+    regexp_tagger = nltk.RegexpTagger(patterns)
+    uni_tagger = nltk.UnigramTagger(train_data, backoff=regexp_tagger)
+    bi_tagger = nltk.BigramTagger(train_data, backoff=uni_tagger)
+    tri_tagger = nltk.TrigramTagger(train_data, backoff=bi_tagger)
+
+    return (
+        regexp_tagger,
+        uni_tagger,
+        bi_tagger,
+        tri_tagger
+    )
+
+taggers = []
+for d in data:
+    taggers.append(treinar_taggers(d["train"], patterns))
+    
+#print(regexp_tagger.tag(["noooossa"]))
+# teste
+
+
+'''
+regexp_tagger1, uni_tagger1, bi_tagger1, tri_tagger1 = treinar_taggers(
+    train_data1,
+    patterns
+)
+
+regexp_tagger2, uni_tagger2, bi_tagger2, tri_tagger2 = treinar_taggers(
+    train_data2,
+    patterns
+)
+
+regexp_tagger3, uni_tagger3, bi_tagger3, tri_tagger3 = treinar_taggers(
+    train_data3,
+    patterns
+)
+'''
+
 
 # ==================================================
-# 5. AVALIAÇÃO
+# 6. AVALIAÇÃO
 # ==================================================
 
-print("PERFORMANCE DOS TAGGERS TREINADOS")
-print("Unigram =", round(uni_tagger.accuracy(test_data)*100, 2), "%")
-print("Bigram =", round(bi_tagger.accuracy(test_data)*100, 2), "%")
+def avaliar_taggers(trained_taggers, test_data):
+    regexp_tagger, uni_tagger, bi_tagger, tri_tagger = trained_taggers
+    test_regex = round(regexp_tagger.accuracy(test_data)*100, 2)
+    test_uni = round(uni_tagger.accuracy(test_data)*100, 2)
+    test_bi = round(bi_tagger.accuracy(test_data)*100, 2)
+    test_tri = round(tri_tagger.accuracy(test_data)*100, 2)
+
+    return(
+        test_regex,
+        test_uni,
+        test_bi,
+        test_tri
+    )
+
+tests = []
+for i,d in enumerate(data):
+    tests.append(avaliar_taggers(taggers[i], d["test"]))
+
+'''
+test_regex1, test_uni1, test_bi1, test_tri1 = avaliar_taggers(
+    test_data1
+)
+
+test_regex2, test_uni2, test_bi2, test_tri2 = avaliar_taggers(
+    test_data2
+)
+
+test_regex3, test_uni3, test_bi3, test_tri3 = avaliar_taggers(
+    test_data3
+)
+'''
+
+for i,s in enumerate(splits):
+    print("PERFORMANCE DOS TAGGERS COM PARTIÇÃO {}/{}:".format(int(s*100), int(100-(s*100))))
+    print("Regexp Tagger: {}%".format(tests[i][0]),
+          "\nUnigram Tagger: {}%".format(tests[i][1]),
+          "\nBigram Tagger: {}%".format(tests[i][2]),
+          "\nTrigram Tagger: {}%".format(tests[i][3])
+         )
+
+#Encontrar melhor performance
+
+nomes = ["Regexp", "Unigram", "Bigram", "Trigram"]
+
+melhor_acuracia = 0
+melhor_particao = 0      
+melhor_tagger = 0        
+
+for i, resultado in enumerate(tests):
+    for j, acuracia in enumerate(resultado):
+        if acuracia > melhor_acuracia:
+            melhor_acuracia = acuracia
+            melhor_particao = i
+            melhor_tagger = j
+
+print(
+    f"Melhor resultado: {nomes[melhor_tagger]} "
+    f"({int(splits[melhor_particao]*100)}/{int(100-(splits[melhor_particao]*100))}) "
+    f"- {melhor_acuracia:.2f}%"
+)
+melhor_modelo = taggers[melhor_particao][melhor_tagger]
 
 # ==================================================
-# 6. NORMALIZAÇÃO DOS TEXTOS
+# 7. NORMALIZAÇÃO DOS TEXTOS
 # ==================================================
 
 # função para normalizar os textos originais por sentença 
-# aplicação do UnigramTagger aos textos originais
+# aplicação do Tagger com melhor performance
 
-def normalizar_unigrama(texto):
+def normalizar(texto):
     resultado = [] # guarda sentença normalizada
     soma = 0 # quantidade de tokens normalizados
     exemplos = [] # alguns tokens normalizados
@@ -180,7 +317,7 @@ def normalizar_unigrama(texto):
         tokens = re.findall(TOKEN_REGEX, sent)
         normalizados = []
         
-        for token, normalizacao in uni_tagger.tag(tokens):
+        for token, normalizacao in melhor_modelo.tag(tokens):
             if normalizacao:
                 # mantém apenas normalização se houver
                 normalizados.append(normalizacao)
@@ -198,7 +335,7 @@ def normalizar_unigrama(texto):
         resultado.append(''.join(normalizados))
         
     print("Total de tokens normalizados:", soma)
-    print("Exemplos de tokens e normalizações:")
+    print("Exemplos de normalizações:")
     
     for original, normalizado in exemplos:
         print(f"{original} -> {normalizado}")
@@ -206,16 +343,17 @@ def normalizar_unigrama(texto):
     return resultado
 
 # normalização dos corpora
-print("NORMALIZAÇÃO DE TRANSCRIÇÃO DE DIÁLOGO ADULTO-CRIANÇA")
+print("NORMALIZAÇÕES USANDO O TAGGER COM MELHOR PERFORMANCE")
+print("TRANSCRIÇÃO DE DIÁLOGO ADULTO-CRIANÇA")
 print("Texto original:")
 print(transcricao_da[:20])
-transcricao_normalizada_unigrama = normalizar_unigrama(transcricao_da)
+transcricao_normalizada = normalizar(transcricao_da)
 print("Texto normalizado:")
-print(transcricao_normalizada_unigrama [:20])
+print(transcricao_normalizada [:20])
 
-print("NORMALIZAÇÃO DE TWEETS")
+print("POSTAGENS NO X (TWITTER)")
 print("Texto original:")
 print(raw_tweets[12:19])
-tweets_normalizados_unigrama = normalizar_unigrama(raw_tweets)
+tweets_normalizados = normalizar(raw_tweets)
 print("Texto normalizado:")
-print(tweets_normalizados_unigrama [12:19])
+print(tweets_normalizados [12:19])
