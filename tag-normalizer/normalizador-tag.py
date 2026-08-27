@@ -24,9 +24,9 @@ PIPELINE - etapas:
 7. Normalização dos textos originais
 
 Modelos avaliados:
-- Unigram Tagger
-- Bigram Tagger
-- Trigram Tagger
+- Unigram
+- Bigram
+- Trigram
 
 Partições de treino/teste:
 - 70/30
@@ -46,12 +46,11 @@ print("NORMALIZADOR AUTOMÁTICO DE TEXTOS INFORMAIS")
 print("=" * 65)
 print("Objetivo: normalização automática de textos informais em português")
 print("Corpora: transcrição de interação adulto-criança e postagens do X (Twitter)")
-print("Modelos: Unigram, Bigram e Trigram Tagger")
+print("Modelos: Unigram, Bigram e Trigram")
 print("Partições: 70/30, 80/20 e 90/10")
 print("Métricas: Acurácia, Precisão, Sensibilidade e F-score")
 print("Seleção final: modelo com maior F-score")
 print("=" * 65)
-
 
 # ==================================================
 # 1. CARREGAMENTO DOS CORPORA
@@ -63,7 +62,7 @@ with open("tweets-teste-2000.csv", "r", encoding="utf-8") as tweets:
 with open("transc-da-teste.txt", "r", encoding="utf-8") as transc:
     transcricao_da = transc.read().splitlines()
 
-# Dicionário do léxico brasileiro para base
+# Conjunto de palavras do léxico brasileiro usado como base de verificação
 with open("lexporbr.csv", "r", encoding="utf-8") as lex:
     lexico = set(lex.read().splitlines())
 
@@ -77,6 +76,7 @@ with open("2000tweets-2705.csv", "r", encoding="utf-8") as tweets:
 with open("transc_da_anotada-2705.txt", "r", encoding="utf-8") as transcricao:
     transcricao_controle = transcricao.read().splitlines()
 
+# Pré-processamento dos dados
 # remoção de cabeçalho nos dados originais e de controle
 transcricao_da = transcricao_da[16:]
 raw_tweets = raw_tweets[2:]
@@ -297,8 +297,8 @@ def normalizar_pattern(texto):
 transcricao_pre = [excluir_letras_repetidas(line) for line in transcricao_da]
 tweets_pre = [excluir_letras_repetidas(line) for line in raw_tweets]
 
-transcricao_pre = [normalizar_pattern(patterns, line) for line in transcricao_pre]
-tweets_pre = [normalizar_pattern(patterns, line) for line in tweets_pre]
+transcricao_pre = [normalizar_pattern(line) for line in transcricao_pre]
+tweets_pre = [normalizar_pattern(line) for line in tweets_pre]
 
 # ==================================================
 # 3. PREPARAÇÃO DOS DADOS PARA TREINAMENTO E TESTE
@@ -348,27 +348,6 @@ dados_estatistica = (
     tuplas_tweet
 )
 
-'''
-# Conferência de formato
-print("Número de sentenças:", len(dados_estatistica))
-print("Primeira sentença:")
-print(dados_estatistica[0])
-
-# Conferência de tokens que possuem normalização
-contador = 0
-
-for sentenca in dados_estatistica:
-    for original, esperado in sentenca:
-        if esperado != "":
-            print(original, "->", esperado)
-            contador += 1
-
-            if contador == 20:
-                break
-
-    if contador == 20:
-        break
-'''
 # soma de tokens
 print("\n" + "=" * 50)
 print("TOTAL DE PALAVRAS CARREGADAS:")
@@ -415,32 +394,6 @@ for s in splits:
 # Os corpora de transcrição e tweets são combinados
 # para formar um único conjunto de treinamento.
 
-'''
-print("\n" + "=" * 50)
-print("CONFERÊNCIA DAS PARTIÇÕES")
-print("=" * 50)
-
-for i, s in enumerate(splits):
-
-    print(
-        f"\nPartição {int(s*100)}/{int((1-s)*100)}"
-    )
-
-    print(
-        "Sentenças de treino:",
-        len(data[i]["train"])
-    )
-
-    print(
-        "Sentenças de teste:",
-        len(data[i]["test"])
-    )
-
-    print("\nPrimeira sentença de teste:")
-
-    print(data[i]["test"][0])
-'''
-
 # ==================================================
 # 4. TREINAMENTO DOS MODELOS
 # ==================================================
@@ -467,111 +420,9 @@ def treinar_modelos(train_data, default):
 modelos = []
 for d in data:
     modelos.append(treinar_modelos(d["train"], default))
-'''
-# TESTE DA PREVISÃO TOKEN A TOKEN
-
-modelo = modelos[0][0]       # Unigram 70/30
-test_data = data[0]["test"]
-
-sentenca = test_data[12]
-
-tokens = [original for original, esperado in sentenca]
-
-previsoes = modelo.tag(tokens)
-
-print("Esperado:")
-print(sentenca)
-
-print("\nPrevisto:")
-print(previsoes)
 
 # ==================================================
-# TESTE E CONTAGEM DOS RESULTADOS
-# ==================================================
-
-def contar_resultados(test_data, modelo):
-
-    tp = tn = fp = fn = 0
-
-    # percorre cada sentença do conjunto de teste
-    for sentenca in test_data:
-
-        # pega somente os tokens originais
-        tokens = [original for original, esperado in sentenca]
-
-        # aplica o modelo à sentença
-        previsto = modelo.tag(tokens)
-
-        # compara token por token
-        for (original, esperado), (token_previsto, normalizacao_prevista) in zip(
-            sentenca,
-            previsto
-        ):
-
-            # TP: deveria normalizar e normalizou corretamente
-            if esperado != "" and normalizacao_prevista == esperado:
-                tp += 1
-
-            # TN: não deveria normalizar e não normalizou
-            elif esperado == "" and normalizacao_prevista == "":
-                tn += 1
-
-            # FP: não deveria normalizar, mas normalizou
-            elif esperado == "" and normalizacao_prevista != "":
-                fp += 1
-
-            # FN: deveria normalizar, mas não normalizou
-            # ou normalizou para a forma errada
-            elif esperado != "" and normalizacao_prevista != esperado:
-                fn += 1
-
-    return tp, tn, fp, fn
-
-
-modelo = modelos[0][0]
-test_data = data[0]["test"]
-
-tp, tn, fp, fn = contar_resultados(test_data, modelo)
-
-print("\n" + "=" * 50)
-print("RESULTADOS")
-print("=" * 50)
-
-print("TP:", tp)
-print("TN:", tn)
-print("FP:", fp)
-print("FN:", fn)
-
-acuracia = (tp + tn) / (tp + tn + fp + fn) * 100
-
-print("Acurácia calculada:", acuracia)
-'''
-# ==================================================
-# 5. AVALIAÇÃO DOS MODELOS
-# ==================================================
-'''
-Avaliação da acurácia de cada modelo 
-a partir da função do NLTK
-com as 3 partições diferentes
-'''
-def avaliar_modelos(trained_taggers, test_data):
-    uni_tagger, bi_tagger, tri_tagger = trained_taggers
-    test_uni = round(uni_tagger.accuracy(test_data)*100, 2)
-    test_bi = round(bi_tagger.accuracy(test_data)*100, 2)
-    test_tri = round(tri_tagger.accuracy(test_data)*100, 2)
-
-    return(
-        test_uni,
-        test_bi,
-        test_tri
-    )
-
-tests = []
-for i,d in enumerate(data):
-    tests.append(avaliar_modelos(modelos[i], d["test"]))
-
-# ==================================================
-# AVALIAÇÃO ESTATÍSTICA GERAL
+# 5. AVALIAÇÃO ESTATÍSTICA DOS MODELOS
 # ==================================================
 
 '''
@@ -722,48 +573,6 @@ print("RESULTADOS ESTATÍSTICOS")
 print("=" * 60)
 print(df_resultados.round(2))
 
-'''
-# checagem de consistência da implementação dos cálculos estatísticos
-
-print("\n" + "=" * 60)
-print("CONFERÊNCIA: ACURÁCIA DA FUNÇÃO x ACURÁCIA DO NLTK")
-print("=" * 60)
-
-for i, split in enumerate(splits):
-
-    particao = f"{int(split * 100)}/{round((1 - split) * 100)}"
-
-    # conjunto de teste da partição
-    test_data = data[i]["test"]
-
-    for j, nome_modelo in enumerate(nomes_modelos):
-
-        # modelo correspondente
-        modelo = modelos[i][j]
-
-        # acurácia calculada pelo NLTK
-        acuracia_nltk = modelo.accuracy(test_data) * 100
-
-        # acurácia calculada pela minha função
-        linha = df_resultados[
-            (df_resultados["Partição"] == particao) &
-            (df_resultados["Modelo"] == nome_modelo)
-        ]
-
-        acuracia_calculada = linha["Acurácia"].iloc[0]
-
-        # diferença entre os dois valores
-        diferenca = abs(
-            acuracia_calculada - acuracia_nltk
-        )
-
-        print(
-            f"{particao} - {nome_modelo}: "
-            f"Função = {acuracia_calculada:.6f}% | "
-            f"NLTK = {acuracia_nltk:.6f}% | "
-            f"Diferença = {diferenca:.10f}"
-        )
-'''
 
 # ==================================================
 # 6. SELEÇÃO DO MELHOR MODELO POR F-SCORE
@@ -840,7 +649,7 @@ def normalizar(texto, modelo):
                 sentenca[ultima_posicao:ocorrencia.start()]
             )
 
-            # se o modelo encontrou uma normalização
+            # se o modelo previu uma normalização
             if previsto != "":
                 nova_sentenca.append(previsto)
 
@@ -888,22 +697,6 @@ print("\n" + "=" * 50)
 print("NORMALIZAÇÃO COM O MELHOR MODELO")
 print("=" * 50)
 
-'''
-print(
-    "Modelo:",
-    melhor_resultado["Modelo"]
-)
-
-print(
-    "Partição:",
-    melhor_resultado["Partição"]
-)
-
-print(
-    "F-score:",
-    round(melhor_resultado["F-score"], 2)
-)
-'''
 # normalização da transcrição
 transcricao_norm = normalizar(
     transcricao_pre,
