@@ -459,7 +459,7 @@ P.: Qui/Que assi/assim u/o chocolati/chocolate vai melá/melar u/o chão todu/to
 A.: Põe nu/no papel filha. (parte do enunciado se superpõe ao da pesquisadora)
 P.: Põe nu/no papelzinhu/papelzinho du/do ladu/lado aqui assim.
  Vamu/Vamos botá/botar dentru/dentro pacóti/pacote, cê/você qué/quer? Ou então aqui, ó.
- Prontu/Pronto, ó. A genti/gente põe as balinhas todas pru/para o ladu/lado u/o chocolati/chocolate pru/para o ôtru/outro.
+ Prontu/Pronto, ó. A genti/gente põe as balinhas todas pru/para_o ladu/lado u/o chocolati/chocolate pru/para_o ôtru/outro.
 (Daniela espirra duas vezes)
 P.: Atchim!
  Atchim!
@@ -468,7 +468,7 @@ P.: (ao mesmo tempo)Que/que qui/que é?
 D.: Eu cumi/comi chocolati/chocolate i/e aí que qui/que fez.
 P.: Quê/que qui/que fez?
 D.: Foi cum/com chocolati/chocolate aqui. Uf mo lou. Aí! Melô/Melou.
-(mostra uns botões na pele estabelecendo relação causa/efeito chocolate e botões)
+(mostra uns botões na pele estabelecendo relação causa efeito chocolate e botões)
 P.: Que/que qui/que cê/você fez na sua péli/pele?
 D.: Hum?
 P.: Que/que qui/que cê/você fez aí na sua perna?
@@ -499,7 +499,7 @@ P.: É?
 D.: Quélu/Quero.
 P.: Hum... vai sê/ser complicadu/complicado, né?
 D.: Mas a minha mãe num/não tá/está aqui.
-P.: Pois é. Intão/Então vamu/vamos  isperá/esperar sua mãe chegá/chegar i/e aí ela mi/me prometeu qui/que vai levá/levar você lá pra
+P.: Pois é. Intão/Então vamu/vamos isperá/esperar sua mãe chegá/chegar i/e aí ela mi/me prometeu qui/que vai levá/levar você lá pra
 você almoçá/almoçar cum/com a Verônica i/e passá/passar a tarde toda cum/com a Verônica. 
 D.: Tem chocolati/chocolate lá?
 P.: Tem balinha i/e tem chocolati/chocolate. Quê qui/que cê/você preferi/prefere?
@@ -546,7 +546,7 @@ D.: (ri) Góstu/Gosto!
 P.: Heim?
 D.: Péga/Pega.
 P.: Pódi/Pode pegá/pegar.
-D.: Num/Não tem pucê/para você (?).
+D.: Num/Não tem pucê/para_você (?).
 P.: Você quer que eu ponha na sua boca?
  Bom um (som aspirado)
 D.: (ri)
@@ -637,7 +637,7 @@ P.: Você gosta de tomar banho?
 D.: Eu gostu/gosto. Tomei banhu/banho aquisi/aqui.
 P.: Tomou banho o que/quê?
 D.: Aqui.
-P.: Aí/qui, na casa da vovó?
+P.: Aí qui, na casa da vovó?
 D.: É.
 P.: Hum. Cabeça tá cheirosa (continua cheirando a cabeça de Daniela)
 D.: E você?
@@ -717,7 +717,7 @@ A.: É (?)
 D.: Cadê a ôta/outra buneca/boneca pá/para pô/pôr. (com um babador na mão)
  Uff!! Alfinêti/Alfinete da Raquel.
 P.: Essi/Esse alfineti/alfinete da Raquel? Aondi/Aonde a gente põe esse alfinête/alfinete?
-D.: não, lá/_ _/ é seu.
+D.: não, lá_ _ é seu.
 P.: É meu?
  Prá/Para que qui/que serve este alfineti/alfinete?
 D.: Eu vu/vou pô/pôr a pulsêra/pulseira, _ _, nu/no se seus olhus/olhos, assim.
@@ -841,7 +841,7 @@ D.:Tá/Está fazendu/fazendo roda-roda roda, roda, roda (cantarolando) pé, pé,
  _ _ dessa é vô/vou abutua/abotoar minha sandália.
 P.: Vai abotoar sua sandália?
 D.: Hum.
-P.: Muito bem. Eu acho que você já devia ter feito isso.
+P.: Muito bem. Eu acho que você já devia tem feito isso.
 D.: Abutua/Abotoa pá/para mim, vó.
  Tá/Está abutuando/abotoando pá/para mim, heim. 
 P.: Quem tá/está abutuando/abotoando pá/para você?
@@ -853,7 +853,7 @@ D.: Minha, a minha também, aí.
 P.: Então nós duas agora estamos de sandália abotuada/abotoada.
 D.: Cadê u/o ócu/óculos assim?
 P.: Meus óculos? Olha aqui. Em cima da minha cabeça.
-D.: Põe ali, ó/olha.
+D.: Pões ali, ó/olha.
 P.: Aqui? Na cama?
 D.: É.
 P.: Então, pronto eu tiro da minha cabeça e ponho na cama.
