@@ -122,7 +122,7 @@ D.: Num/Não sei.
 P.: Heim?
 D.: Num/Não sei!
 P.: Não sabe?
- A tia num/não falô/falou agora quêli/que ele ia passá/passar amanhã?
+ A tia num/não falô/falou agora quêli/que_ele ia passá/passar amanhã?
 D.: Amanhã.
 P.: Hum
  I/E a mamãe vai chegá/chegar qui/que dia?
